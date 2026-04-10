@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindNest Games — Craft. Play. Explore.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── CSS Variables ─────────────────────────────── */
+    :root {
+      --bg:        #0b0c14;
+      --bg2:       #111220;
+      --bg3:       #161828;
+      --gold:      #f5c842;
+      --gold2:     #ffd966;
+      --gold-dim:  #b8922e;
+      --gold-glow: rgba(245,200,66,0.22);
+      --accent:    #ff7f50;
+      --accent2:   #ff4f8b;
+      --text:      #f0ecd8;
+      --muted:     #8a8799;
+      --card-bg:   #13152a;
+      --border:    rgba(245,200,66,0.18);
+      --radius:    18px;
+      --radius-lg: 28px;
+    }
+
+    /* ─── Reset ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    /* ─── Scrollbar ──────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 99px; }
+
+    /* ─── Noise Overlay ──────────────────────────────── */
+    body::before {
+      content:'';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: .55;
+    }
+
+    /* ─── Nav ────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6vw;
+      height: 68px;
+      background: rgba(11,12,20,0.82);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.55rem;
+      letter-spacing: .5px;
+    }
+    .nav-logo .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--gold), var(--accent));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 14px var(--gold-glow);
+      flex-shrink: 0;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-logo em { color: var(--text); font-style: normal; }
+
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      font-weight: 700; font-size: .92rem; letter-spacing: .3px;
+      color: var(--muted);
+      transition: color .2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content:''; position: absolute; bottom: -4px; left:0; right:0; height:2px;
+      background: var(--gold); border-radius: 2px;
+      transform: scaleX(0); transition: transform .22s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #1a1200 !important;
+      padding: .42rem 1.1rem;
+      border-radius: 50px;
+      font-weight: 800 !important;
+      font-size: .88rem !important;
+      box-shadow: 0 4px 18px rgba(245,200,66,.28);
+      transition: transform .15s, box-shadow .15s !important;
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,200,66,.38) !important; }
+    .nav-cta::after { display: none !important; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      background: none; border: none; padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 26px; height: 2.5px;
+      background: var(--gold); border-radius: 99px;
+      transition: transform .25s, opacity .25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none; flex-direction: column; gap: 0;
+      position: fixed; top: 68px; left: 0; right: 0; z-index: 99;
+      background: rgba(13,14,26,.97);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      padding: 1rem 6vw 1.5rem;
+      transform: translateY(-10px);
+      opacity: 0;
+      transition: transform .25s, opacity .25s;
+      pointer-events: none;
+    }
+    .mobile-menu.open {
+      display: flex; pointer-events: auto;
+      transform: translateY(0); opacity: 1;
+    }
+    .mobile-menu a {
+      padding: .8rem 0;
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      transition: color .2s;
+    }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .mobile-menu a:hover { color: var(--gold); }
+
+    /* ─── Hero ───────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 100px 6vw 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated star field */
+    .stars {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .star {
+      position: absolute; background: #fff; border-radius: 50%;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+      opacity: 0;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity:0; transform:scale(.5); }
+      50% { opacity: var(--op, .6); transform:scale(1); }
+    }
+
+    /* Glowing orbs */
+    .orb {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      filter: blur(80px); opacity: .28;
+    }
+    .orb-1 { width: 500px; height: 500px; background: var(--gold); top: -120px; right: -100px; animation: orbFloat 8s ease-in-out infinite; }
+    .orb-2 { width: 350px; height: 350px; background: var(--accent2); bottom: -80px; left: -80px; animation: orbFloat 10s ease-in-out infinite reverse; }
+    .orb-3 { width: 250px; height: 250px; background: var(--accent); top: 40%; left: 20%; animation: orbFloat 12s ease-in-out infinite 2s; }
+    @keyframes orbFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(20px,-30px) scale(1.07); }
+    }
+
+    .hero-inner {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; gap: 4rem;
+      max-width: 1200px; width: 100%; margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(245,200,66,.12);
+      border: 1px solid rgba(245,200,66,.3);
+      border-radius: 50px;
+      padding: .3rem .85rem;
+      font-size: .8rem; font-weight: 700;
+      color: var(--gold2); letter-spacing: .5px;
+      margin-bottom: 1.2rem;
+      animation: fadeUp .6s ease both;
+    }
+    .hero-badge .dot {
+      width: 7px; height: 7px; background: var(--gold);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--gold);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
+
+    .hero-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+      animation: fadeUp .7s ease .1s both;
+    }
+    .hero-title .line-gold { color: var(--gold); display: block; }
+    .hero-title .line-glow {
+      color: var(--gold2);
+      text-shadow: 0 0 40px rgba(245,200,66,.45);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem; color: var(--muted); max-width: 420px;
+      line-height: 1.75; margin-bottom: 2rem;
+      animation: fadeUp .7s ease .2s both;
+    }
+
+    .hero-btns {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      animation: fadeUp .7s ease .3s both;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #1a1200;
+      font-family: 'Baloo 2', cursive;
+      font-weight: 800; font-size: 1rem;
+      padding: .7rem 1.6rem; border-radius: 50px;
+      box-shadow: 0 6px 24px rgba(245,200,66,.32);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(245,200,66,.45); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700; font-size: 1rem;
+      padding: .7rem 1.6rem; border-radius: 50px;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+
+    /* Hero illustration */
+    .hero-art {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      animation: fadeUp .8s ease .2s both;
+    }
+    .hero-art-ring {
+      width: min(420px, 90vw); height: min(420px, 90vw);
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--gold), var(--accent), var(--accent2), var(--gold));
+      padding: 4px;
+      animation: spin 20s linear infinite;
+      box-shadow: 0 0 60px var(--gold-glow), 0 0 120px rgba(245,200,66,.1);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hero-art-inner {
+      width: 100%; height: 100%;
+      background: var(--bg2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: .5rem;
+      animation: spin 20s linear infinite reverse;
+    }
+    .hero-art-emoji { font-size: clamp(4rem, 8vw, 7rem); filter: drop-shadow(0 0 18px rgba(245,200,66,.5)); animation: bob 3s ease-in-out infinite; }
+    @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    .hero-art-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem; color: var(--gold2); letter-spacing: 1px;
+    }
+
+    /* floating shapes around ring */
+    .float-chip {
+      position: absolute;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: .5rem .85rem;
+      font-size: .8rem; font-weight: 700;
+      display: flex; align-items: center; gap: .4rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      animation: chipFloat var(--cd, 4s) ease-in-out infinite;
+      animation-delay: var(--cdel, 0s);
+      white-space: nowrap;
+    }
+    @keyframes chipFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .chip-1 { top: 8%; left: -5%; --cd:4s; --cdel:0s; color:var(--gold); }
+    .chip-2 { bottom: 12%; right: -6%; --cd:5s; --cdel:.8s; color:var(--accent2); }
+    .chip-3 { top: 50%; left: -10%; --cd:6s; --cdel:1.5s; color: #7fffd4; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ─── Section Shared ─────────────────────────────── */
+    section { position: relative; z-index: 1; }
+    .section-pad { padding: 90px 6vw; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .section-tag {
+      display: inline-flex; align-items: center; gap: .45rem;
+      font-size: .78rem; font-weight: 800; letter-spacing: 1.2px;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: .8rem;
+    }
+    .section-tag .bar { width: 22px; height: 2px; background: var(--gold); border-radius: 2px; }
+
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.2;
+      margin-bottom: .6rem;
+    }
+    .section-sub {
+      color: var(--muted); font-size: 1rem; max-width: 540px; margin-bottom: 3rem;
+    }
+
+    /* Divider */
+    .divider {
+      border: none; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0;
+    }
+
+    /* ─── Stats Bar ──────────────────────────────────── */
+    .stats-bar {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 6vw;
+    }
+    .stats-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-around;
+      gap: 1.5rem; flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2rem; color: var(--gold);
+      line-height: 1;
+      text-shadow: 0 0 20px var(--gold-glow);
+    }
+    .stat-label { font-size: .8rem; color: var(--muted); font-weight: 700; letter-spacing: .5px; margin-top: .2rem; }
+    .stat-divider { width: 1px; height: 40px; background: var(--border); }
+
+    /* ─── Products ───────────────────────────────────── */
+    .products-section { background: var(--bg); }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .game-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      cursor: pointer;
+    }
+    .game-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(245,200,66,.3);
+      border-color: rgba(245,200,66,.4);
+    }
+    .game-card:hover .card-banner-overlay { opacity: 1; }
+    .game-card:hover .play-btn { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+
+    .card-banner {
+      height: 175px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-banner-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.35);
+      opacity: 0; transition: opacity .25s;
+    }
+    .play-btn {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(.7);
+      opacity: 0; transition: transform .25s, opacity .25s;
+      width: 50px; height: 50px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 24px rgba(245,200,66,.5);
+    }
+
+    /* Card banner color themes */
+    .theme-violet  { background: linear-gradient(135deg, #1a0533 0%, #4b1585 50%, #7b2ff7 100%); }
+    .theme-teal    { background: linear-gradient(135deg, #031a1a 0%, #0d5454 50%, #00c9b1 100%); }
+    .theme-fire    { background: linear-gradient(135deg, #1a0800 0%, #7a2100 50%, #ff6600 100%); }
+    .theme-rose    { background: linear-gradient(135deg, #1a0018 0%, #6b0055 50%, #ff4fa8 100%); }
+    .theme-sky     { background: linear-gradient(135deg, #000e1a 0%, #0044aa 50%, #00aaff 100%); }
+    .theme-lime    { background: linear-gradient(135deg, #0d1a00 0%, #3a6600 50%, #88dd00 100%); }
+
+    .card-emoji { font-size: 3.8rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,.5)); z-index: 1; position: relative; }
+
+    .card-badge {
+      position: absolute; top: 12px; right: 12px; z-index: 2;
+      font-size: .68rem; font-weight: 800; letter-spacing: .5px;
+      padding: .22rem .65rem; border-radius: 50px;
+      text-transform: uppercase;
+    }
+    .badge-new  { background: var(--gold); color: #1a1200; }
+    .badge-hot  { background: var(--accent); color: #fff; }
+    .badge-soon { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.25); }
+
+    .card-body { padding: 1.2rem 1.3rem 1.4rem; }
+    .card-genre {
+      font-size: .72rem; font-weight: 800; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--gold-dim); margin-bottom: .35rem;
+    }
+    .card-name {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.25rem; font-weight: 800; margin-bottom: .4rem;
+      color: var(--text);
+    }
+    .card-desc { font-size: .87rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.55; }
+
+    .card-stars { display: flex; align-items: center; gap: .25rem; margin-bottom: 1rem; }
+    .card-stars .stars-row { color: var(--gold); font-size: .85rem; letter-spacing: 1px; }
+    .card-stars .rating { font-size: .8rem; font-weight: 700; color: var(--muted); margin-left: .3rem; }
+
+    .gplay-btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: #000;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 10px;
+      padding: .45rem 1rem;
+      width: 100%;
+      transition: border-color .2s, background .2s;
+    }
+    .gplay-btn:hover { background: #111; border-color: var(--gold); }
+    .gplay-icon { flex-shrink: 0; }
+    .gplay-text-group { display: flex; flex-direction: column; line-height: 1.2; }
+    .gplay-small { font-size: .62rem; color: #aaa; letter-spacing: .3px; }
+    .gplay-big   { font-size: .92rem; font-weight: 800; color: #fff; }
+
+    /* ─── Features ───────────────────────────────────── */
+    .features-section { background: var(--bg2); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.4rem;
+    }
+    .feature-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 1.5rem;
+      transition: transform .2s, border-color .2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: rgba(245,200,66,.35); }
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--gold), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.1rem;
+      box-shadow: 0 4px 18px rgba(245,200,66,.25);
+    }
+    .feature-title { font-family: 'Baloo 2', cursive; font-size: 1.08rem; font-weight: 800; margin-bottom: .4rem; }
+    .feature-desc { font-size: .87rem; color: var(--muted); line-height: 1.6; }
+
+    /* ─── About ──────────────────────────────────────── */
+    .about-section { background: var(--bg); }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5rem; align-items: center;
+    }
+    .about-visual {
+      position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .about-card-stack { position: relative; width: 300px; height: 300px; margin: 0 auto; }
+    .about-stack-card {
+      position: absolute;
+      width: 220px; height: 280px;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+    }
+    .asc-1 { background: linear-gradient(135deg,#1a0533,#4b1585); top: 0; left: 0; transform: rotate(-8deg); }
+    .asc-2 { background: linear-gradient(135deg,#031a1a,#0d5454,#00c9b1); top: 20px; left: 50px; transform: rotate(2deg); }
+    .asc-3 {
+      background: var(--card-bg);
+      border: 1.5px solid rgba(245,200,66,.35);
+      top: 10px; left: 25px; z-index: 3;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
+      padding: 1.4rem;
+    }
+    .asc-logo { font-family:'Fredoka One',cursive; font-size:1.6rem; color:var(--gold); text-align:center; }
+    .asc-tagline { font-size:.78rem; color:var(--muted); text-align:center; font-weight:600; }
+
+    .about-text .section-title { margin-bottom: 1rem; }
+    .about-text p { color: var(--muted); font-size: .97rem; line-height: 1.8; margin-bottom: 1rem; }
+    .about-text p strong { color: var(--gold2); }
+    .about-chips { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.5rem; }
+    .about-chip {
+      background: rgba(245,200,66,.1);
+      border: 1px solid rgba(245,200,66,.2);
+      color: var(--gold2);
+      border-radius: 50px;
+      padding: .3rem .9rem;
+      font-size: .8rem; font-weight: 700;
+    }
+
+    /* ─── Privacy ────────────────────────────────────── */
+    .privacy-section { background: var(--bg2); }
+    .privacy-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 3rem 3.5rem;
+      max-width: 860px; margin: 0 auto;
+    }
+    .privacy-box h3 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.1rem; font-weight: 800; color: var(--gold2);
+      margin: 1.6rem 0 .5rem;
+    }
+    .privacy-box h3:first-child { margin-top: 0; }
+    .privacy-box p, .privacy-box li {
+      color: var(--muted); font-size: .93rem; line-height: 1.8;
+    }
+    .privacy-box ul { padding-left: 1.4rem; margin-top: .4rem; }
+    .privacy-box ul li { margin-bottom: .3rem; }
+    .privacy-box a { color: var(--gold); }
+    .privacy-box .last-updated {
+      font-size: .8rem; color: var(--muted);
+      background: rgba(245,200,66,.07);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .4rem .9rem;
+      display: inline-block; margin-bottom: 1.5rem;
+    }
+
+    /* ─── Contact ────────────────────────────────────── */
+    .contact-section { background: var(--bg); }
+    .contact-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: start;
+    }
+    .contact-info h2 { font-family:'Fredoka One',cursive; font-size:2rem; margin-bottom:1rem; }
+    .contact-info p { color:var(--muted); font-size:.95rem; line-height:1.75; margin-bottom:1.5rem; }
+    .contact-detail {
+      display: flex; align-items: flex-start; gap: .85rem;
+      margin-bottom: 1.1rem;
+    }
+    .contact-detail-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: rgba(245,200,66,.1);
+      border: 1px solid rgba(245,200,66,.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .contact-detail-text { font-size:.88rem; color:var(--muted); line-height:1.5; }
+    .contact-detail-text strong { color:var(--text); display:block; font-size:.82rem; letter-spacing:.4px; text-transform:uppercase; margin-bottom:.15rem; }
+
+    /* Contact form */
+    .contact-form { background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2.2rem; }
+    .contact-form h3 { font-family:'Baloo 2',cursive; font-size:1.25rem; font-weight:800; margin-bottom:1.4rem; }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label { display:block; font-size:.82rem; font-weight:700; color:var(--muted); letter-spacing:.4px; margin-bottom:.45rem; text-transform:uppercase; }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      color: var(--text);
+      font-family:'Nunito',sans-serif;
+      font-size: .93rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--gold); }
+    .form-group textarea { height: 110px; resize: vertical; }
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #1a1200;
+      font-family:'Baloo 2',cursive;
+      font-weight: 800; font-size: 1rem;
+      padding: .75rem;
+      border: none; border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(245,200,66,.28);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(245,200,66,.4); }
+
+    /* ─── Footer ─────────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 60px 6vw 32px;
+    }
+    .footer-inner { max-width:1200px; margin:0 auto; }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem; margin-bottom: 3rem;
+    }
+    .footer-brand .nav-logo { margin-bottom: 1rem; }
+    .footer-brand p { font-size:.88rem; color:var(--muted); line-height:1.7; max-width:260px; }
+    .footer-col h4 {
+      font-family:'Baloo 2',cursive;
+      font-size:.88rem; font-weight:800;
+      text-transform:uppercase; letter-spacing:.8px;
+      color: var(--gold); margin-bottom: 1rem;
+    }
+    .footer-col a {
+      display:block; font-size:.88rem; color:var(--muted);
+      margin-bottom:.55rem; transition:color .2s;
+    }
+    .footer-col a:hover { color:var(--text); }
+
+    .footer-bottom {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap: wrap; gap: 1rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size:.82rem; color:var(--muted);
+    }
+    .footer-bottom a { color:var(--muted); transition:color .2s; }
+    .footer-bottom a:hover { color:var(--gold); }
+    .footer-heart { color: var(--accent2); }
+
+    /* Social icons */
+    .social-links { display:flex; gap:.7rem; margin-top:1.2rem; }
+    .social-btn {
+      width:36px; height:36px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius:9px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem;
+      transition: border-color .2s, background .2s;
+    }
+    .social-btn:hover { border-color:var(--gold); background: rgba(245,200,66,.1); }
+
+    /* ─── Back to Top ────────────────────────────────── */
+    .back-top {
+      position: fixed; bottom: 24px; right: 24px; z-index: 200;
+      width: 44px; height: 44px;
+      background: var(--gold);
+      border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: #1a1200;
+      box-shadow: 0 4px 18px rgba(245,200,66,.4);
+      opacity: 0; transform: translateY(12px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+    }
+    .back-top.visible { opacity:1; transform:translateY(0); pointer-events:auto; }
+    .back-top:hover { transform: translateY(-3px) !important; }
+
+    /* ─── Responsive ─────────────────────────────────── */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+
+      .hero-inner { grid-template-columns: 1fr; text-align: center; }
+      .hero-art { order: -1; }
+      .hero-sub { margin-left: auto; margin-right: auto; }
+      .hero-btns { justify-content: center; }
+      .hero-art-ring { width: min(280px, 75vw); height: min(280px, 75vw); }
+      .chip-1, .chip-2, .chip-3 { display: none; }
+
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .about-visual { display: none; }
+
+      .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .footer-brand { grid-column: 1/-1; }
+    }
+
+    @media (max-width: 600px) {
+      .section-pad { padding: 65px 5vw; }
+      .stats-inner { gap: 1rem; }
+      .stat-divider { display: none; }
+      .footer-top { grid-template-columns: 1fr; }
+      .privacy-box { padding: 2rem 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav>
+  <a href="#home" class="nav-logo">
+    <div class="logo-icon">🎮</div>
+    <div><span>MindNest</span> <em>Games</em></div>
+  </a>
+
+  <div class="nav-links">
+    <a href="#home">Home</a>
+    <a href="#games">Games</a>
+    <a href="#about">About</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#contact" class="nav-cta">Contact Us</a>
+  </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home"    onclick="closeMobileMenu()">🏠 Home</a>
+  <a href="#games"   onclick="closeMobileMenu()">🎮 Games</a>
+  <a href="#about"   onclick="closeMobileMenu()">🏢 About Us</a>
+  <a href="#privacy" onclick="closeMobileMenu()">🔒 Privacy Policy</a>
+  <a href="#contact" onclick="closeMobileMenu()">📬 Contact</a>
+</div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero" id="home">
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-inner">
+    <!-- Left Copy -->
+    <div class="hero-copy">
+      <div class="hero-badge">
+        <span class="dot"></span> Lahore-based Mobile Game Studio
+      </div>
+      <h1 class="hero-title">
+        Where <span class="line-gold">Great Games</span>
+        <span class="line-glow">Nest & Grow</span>
+      </h1>
+      <p class="hero-sub">
+        MindNest Games crafts playful, addictive mobile experiences. We pour heart, gold, and a little bit of chaos into every pixel.
+      </p>
+      <div class="hero-btns">
+        <a href="#games" class="btn-primary">🎮 Explore Games</a>
+        <a href="#about" class="btn-ghost">Learn More →</a>
+      </div>
+    </div>
+
+    <!-- Right Art -->
+    <div class="hero-art">
+      <div class="hero-art-ring">
+        <div class="hero-art-inner">
+          <div class="hero-art-emoji">🎮</div>
+          <div class="hero-art-label">MindNest Games</div>
+        </div>
+      </div>
+
+      <!-- Floating chips -->
+      <div class="float-chip chip-1">⭐ Top Rated</div>
+      <div class="float-chip chip-2">🔥 New Releases</div>
+      <div class="float-chip chip-3">🏆 50K+ Players</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ STATS ═══════════════ -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num">50K+</div>
+      <div class="stat-label">Happy Players</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-num">6</div>
+      <div class="stat-label">Games Published</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-num">4.7★</div>
+      <div class="stat-label">Avg. Rating</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Free to Play</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ GAMES / PRODUCTS ═══════════════ -->
+<section class="products-section section-pad" id="games">
+  <div class="container">
+    <div class="section-tag"><span class="bar"></span> Our Games</div>
+    <h2 class="section-title">Crafted for Fun,<br>Built for Everyone</h2>
+    <p class="section-sub">Each game is designed with love from our studio in Lahore. Pick your next adventure and start playing for free on Google Play.</p>
+
+    <div class="games-grid">
+
+      <!-- Card 1 -->
+      <div class="game-card">
+        <div class="card-banner theme-violet">
+          <div class="card-banner-overlay"></div>
+          <div class="play-btn">▶</div>
+          <span class="card-badge badge-hot">🔥 Hot</span>
+          <div class="card-emoji">🧩</div>
+        </div>
+        <div class="card-body">
+          <div class="card-genre">Puzzle</div>
+          <div class="card-name">Block Blitz Saga</div>
+          <div class="card-desc">Swipe, match, and blast your way through 500+ mind-bending puzzle levels. Can you reach the legendary Diamond stage?</div>
+          <div class="card-stars">
+            <div class="stars-row">★★★★★</div>
+            <div class="rating">4.9 (2.1K)</div>
+          </div>
+          <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="gplay-btn">
+            <svg class="gplay-icon" width="22" height="22" viewBox="0 0 512 512"><path fill="#4285F4" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/><path fill="#34A853" d="M104.6 13l-.2.1 221 239.9 60.1-60.1L104.6 13z"/><path fill="#FBBC04" d="M31.2 479.5c6 22.2 26.4 38.5 50.6 38.5 14 0 27-5.4 36.8-15.3l.2-.2L345 301.9 263.8 221 31.2 479.5z"/><path fill="#EA4335" d="M31.2 32.5L263.8 291 345 210l-226.3-130C109 74.6 96.4 69.5 83 69.5c-24.2 0-44.6 16.3-50.6 38.5"/><path fill="#4285F4" d="M345 210l-60.1 60.1 60.1 60.1 120.8-69.5c17.3-10 17.3-26.3 0-36.3L345 210z"/></svg>
+            <div class="gplay-text-group">
+              <span class="gplay-small">GET IT ON</span>
+              <span class="gplay-big">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="game-card">
+        <div class="card-banner theme-teal">
+          <div class="card-banner-overlay"></div>
+          <div class="play-btn">▶</div>
+          <span class="card-badge badge-new">✨ New</span>
+          <div class="card-emoji">🏎️</div>
+        </div>
+        <div class="card-body">
+          <div class="card-genre">Racing</div>
+          <div class="card-name">Turbo Drift World</div>
+          <div class="card-desc">Feel the adrenaline of high-speed street racing. Drift, overtake, and customize your dream car across 30 iconic tracks.</div>
+          <div class="card-stars">
+            <div class="stars-row">★★★★★</div>
+            <div class="rating">4.8 (1.4K)</div>
+          </div>
+          <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="gplay-btn">
+            <svg class="gplay-icon" width="22" height="22" viewBox="0 0 512 512"><path fill="#4285F4" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/><path fill="#34A853" d="M104.6 13l-.2.1 221 239.9 60.1-60.1L104.6 13z"/><path fill="#FBBC04" d="M31.2 479.5c6 22.2 26.4 38.5 50.6 38.5 14 0 27-5.4 36.8-15.3l.2-.2L345 301.9 263.8 221 31.2 479.5z"/><path fill="#EA4335" d="M31.2 32.5L263.8 291 345 210l-226.3-130C109 74.6 96.4 69.5 83 69.5c-24.2 0-44.6 16.3-50.6 38.5"/><path fill="#4285F4" d="M345 210l-60.1 60.1 60.1 60.1 120.8-69.5c17.3-10 17.3-26.3 0-36.3L345 210z"/></svg>
+            <div class="gplay-text-group">
+              <span class="gplay-small">GET IT ON</span>
+              <span class="gplay-big">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="game-card">
+        <div class="card-banner theme-fire">
+          <div class="card-banner-overlay"></div>
+          <div class="play-btn">▶</div>
+          <span class="card-badge badge-hot">🔥 Hot</span>
+          <div class="card-emoji">⚔️</div>
+        </div>
+        <div class="card-body">
+          <div class="card-genre">Action RPG</div>
+          <div class="card-name">Shadow Knights</div>
+          <div class="card-desc">Forge your warrior, master powerful skills, and battle mythical beasts across a richly hand-crafted fantasy world.</div>
+          <div class="card-stars">
+            <div class="stars-row">★★★★½</div>
+            <div class="rating">4.6 (3.7K)</div>
+          </div>
+          <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="gplay-btn">
+            <svg class="gplay-icon" width="22" height="22" viewBox="0 0 512 512"><path fill="#4285F4" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/><path fill="#34A853" d="M104.6 13l-.2.1 221 239.9 60.1-60.1L104.6 13z"/><path fill="#FBBC04" d="M31.2 479.5c6 22.2 26.4 38.5 50.6 38.5 14 0 27-5.4 36.8-15.3l.2-.2L345 301.9 263.8 221 31.2 479.5z"/><path fill="#EA4335" d="M31.2 32.5L263.8 291 345 210l-226.3-130C109 74.6 96.4 69.5 83 69.5c-24.2 0-44.6 16.3-50.6 38.5"/><path fill="#4285F4" d="M345 210l-60.1 60.1 60.1 60.1 120.8-69.5c17.3-10 17.3-26.3 0-36.3L345 210z"/></svg>
+            <div class="gplay-text-group">
+              <span class="gplay-small">GET IT ON</span>
+              <span class="gplay-big">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="game-card">
+        <div class="card-banner theme-rose">
+          <div class="card-banner-overlay"></div>
+          <div class="play-btn">▶</div>
+          <span class="card-badge badge-new">✨ New</span>
+          <div class="card-emoji">🌸</div>
+        </div>
+        <div class="card-body">
+          <div class="card-genre">Casual</div>
+          <div class="card-name">Garden Bloom</div>
+          <div class="card-desc">Plant, grow, and harvest in your dream garden. A relaxing and adorable casual game for all ages — chill vibes guaranteed.</div>
+          <div class="card-stars">
+            <div class="stars-row">★★★★★</div>
+            <div class="rating">4.9 (980)</div>
+          </div>
+          <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="gplay-btn">
+            <svg class="gplay-icon" width="22" height="22" viewBox="0 0 512 512"><path fill="#4285F4" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/><path fill="#34A853" d="M104.6 13l-.2.1 221 239.9 60.1-60.1L104.6 13z"/><path fill="#FBBC04" d="M31.2 479.5c6 22.2 26.4 38.5 50.6 38.5 14 0 27-5.4 36.8-15.3l.2-.2L345 301.9 263.8 221 31.2 479.5z"/><path fill="#EA4335" d="M31.2 32.5L263.8 291 345 210l-226.3-130C109 74.6 96.4 69.5 83 69.5c-24.2 0-44.6 16.3-50.6 38.5"/><path fill="#4285F4" d="M345 210l-60.1 60.1 60.1 60.1 120.8-69.5c17.3-10 17.3-26.3 0-36.3L345 210z"/></svg>
+            <div class="gplay-text-group">
+              <span class="gplay-small">GET IT ON</span>
+              <span class="gplay-big">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="game-card">
+        <div class="card-banner theme-sky">
+          <div class="card-banner-overlay"></div>
+          <div class="play-btn">▶</div>
+          <span class="card-badge badge-soon">Coming Soon</span>
+          <div class="card-emoji">🚀</div>
+        </div>
+        <div class="card-body">
+          <div class="card-genre">Arcade</div>
+          <div class="card-name">StarJump Galaxy</div>
+          <div class="card-desc">Dodge asteroids, collect star fuel, and jump across galaxies in this retro-style endless arcade adventure.</div>
+          <div class="card-stars">
+            <div class="stars-row">★★★★½</div>
+            <div class="rating">4.7 (512)</div>
+          </div>
+          <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="gplay-btn">
+            <svg class="gplay-icon" width="22" height="22" viewBox="0 0 512 512"><path fill="#4285F4" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/><path fill="#34A853" d="M104.6 13l-.2.1 221 239.9 60.1-60.1L104.6 13z"/><path fill="#FBBC04" d="M31.2 479.5c6 22.2 26.4 38.5 50.6 38.5 14 0 27-5.4 36.8-15.3l.2-.2L345 301.9 263.8 221 31.2 479.5z"/><path fill="#EA4335" d="M31.2 32.5L263.8 291 345 210l-226.3-130C109 74.6 96.4 69.5 83 69.5c-24.2 0-44.6 16.3-50.6 38.5"/><path fill="#4285F4" d="M345 210l-60.1 60.1 60.1 60.1 120.8-69.5c17.3-10 17.3-26.3 0-36.3L345 210z"/></svg>
+            <div class="gplay-text-group">
+              <span class="gplay-small">GET IT ON</span>
+              <span class="gplay-big">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="game-card">
+        <div class="card-banner theme-lime">
+          <div class="card-banner-overlay"></div>
+          <div class="play-btn">▶</div>
+          <span class="card-badge badge-new">✨ New</span>
+          <div class="card-emoji">🐸</div>
+        </div>
+        <div class="card-body">
+          <div class="card-genre">Platformer</div>
+          <div class="card-name">Froggy Leap</div>
+          <div class="card-desc">Help Froggy jump from lily pad to lily pad without getting wet! Endless fun, endless fails, endless laughs.</div>
+          <div class="card-stars">
+            <div class="stars-row">★★★★★</div>
+            <div class="rating">4.8 (745)</div>
+          </div>
+          <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="gplay-btn">
+            <svg class="gplay-icon" width="22" height="22" viewBox="0 0 512 512"><path fill="#4285F4" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/><path fill="#34A853" d="M104.6 13l-.2.1 221 239.9 60.1-60.1L104.6 13z"/><path fill="#FBBC04" d="M31.2 479.5c6 22.2 26.4 38.5 50.6 38.5 14 0 27-5.4 36.8-15.3l.2-.2L345 301.9 263.8 221 31.2 479.5z"/><path fill="#EA4335" d="M31.2 32.5L263.8 291 345 210l-226.3-130C109 74.6 96.4 69.5 83 69.5c-24.2 0-44.6 16.3-50.6 38.5"/><path fill="#4285F4" d="M345 210l-60.1 60.1 60.1 60.1 120.8-69.5c17.3-10 17.3-26.3 0-36.3L345 210z"/></svg>
+            <div class="gplay-text-group">
+              <span class="gplay-small">GET IT ON</span>
+              <span class="gplay-big">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /games-grid -->
+
+    <div style="text-align:center; margin-top:2.5rem;">
+      <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="btn-ghost" style="display:inline-flex;">
+        View All on Google Play &nbsp;→
+      </a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════ WHY US / FEATURES ═══════════════ -->
+<section class="features-section section-pad">
+  <div class="container">
+    <div class="section-tag"><span class="bar"></span> Why MindNest</div>
+    <h2 class="section-title">Made with Passion,<br>Played with Joy</h2>
+    <p class="section-sub">We're a small but mighty indie studio with big dreams and an even bigger obsession with fun.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Hand-Crafted Design</div>
+        <div class="feature-desc">Every level, character, and screen is thoughtfully designed by our small creative team who care deeply about aesthetics.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <div class="feature-title">Mobile-First Always</div>
+        <div class="feature-desc">Built for your phone from the ground up — smooth performance, intuitive controls, and optimized for all Android devices.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔓</div>
+        <div class="feature-title">Free to Play</div>
+        <div class="feature-desc">All of our games are free to download and enjoy. No paywalls blocking the fun — just pure gameplay for everyone.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">Privacy First</div>
+        <div class="feature-desc">We value your data and your trust. Our games follow strict privacy standards and we never sell your personal information.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-title">Built in Lahore</div>
+        <div class="feature-desc">Proudly made in Pakistan — a local studio with global ambitions, bringing Lahori creativity to the worldwide gaming stage.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <div class="feature-title">Community Driven</div>
+        <div class="feature-desc">We listen, iterate, and improve based on player feedback. Our community shapes every update and every new feature.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════ ABOUT US ═══════════════ -->
+<section class="about-section section-pad" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-visual">
+        <div class="about-card-stack">
+          <div class="about-stack-card asc-1"></div>
+          <div class="about-stack-card asc-2"></div>
+          <div class="about-stack-card asc-3">
+            <div style="font-size:3rem;">🎮</div>
+            <div class="asc-logo">MindNest<br>Games</div>
+            <div class="asc-tagline">Craft. Play. Explore.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-text">
+        <div class="section-tag"><span class="bar"></span> Our Story</div>
+        <h2 class="section-title">We Are<br>MindNest Games</h2>
+        <p>MindNest Games is an <strong>independent mobile game studio</strong> based in the heart of Lahore, Pakistan. We started with a simple belief — that great games don't need massive budgets, just big ideas and genuine passion.</p>
+        <p>Our small but dedicated team crafts <strong>fun, polished, and accessible</strong> mobile games for Android players around the world. From brain-twisting puzzles to heart-pounding racing and epic RPG adventures, every title we ship reflects our obsession with quality and delight.</p>
+        <p>We're proud to be <strong>building something from Pakistan</strong> that reaches players globally — and we're just getting started.</p>
+        <div class="about-chips">
+          <span class="about-chip">🏙️ Lahore, Pakistan</span>
+          <span class="about-chip">📱 Android Games</span>
+          <span class="about-chip">🎯 Indie Studio</span>
+          <span class="about-chip">🌟 Since 2022</span>
+          <span class="about-chip">💡 Fun First</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════ PRIVACY POLICY ═══════════════ -->
+<section class="privacy-section section-pad" id="privacy">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:3rem;">
+      <div class="section-tag" style="justify-content:center;"><span class="bar"></span> Legal</div>
+      <h2 class="section-title">Privacy Policy</h2>
+      <p class="section-sub" style="margin:0 auto;">Your privacy matters to us. Here's how we handle your data.</p>
+    </div>
+    <div class="privacy-box">
+      <div class="last-updated">Last Updated: April 2025</div>
+
+      <h3>1. Introduction</h3>
+      <p>MindNest Games ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy describes how we collect, use, and share information in connection with your use of our mobile games and this website. By using our products, you agree to the terms of this policy.</p>
+
+      <h3>2. Information We Collect</h3>
+      <p>We may collect the following types of information:</p>
+      <ul>
+        <li><strong>Usage Data:</strong> Game progress, scores, session duration, and in-game interactions.</li>
+        <li><strong>Device Information:</strong> Device model, operating system version, and unique device identifiers for crash reporting and performance optimization.</li>
+        <li><strong>Advertising Data:</strong> If you view ads within our games, third-party ad networks may collect information as described in their own privacy policies.</li>
+        <li><strong>Contact Information:</strong> If you contact us via email, we may retain your name and email address to respond to you.</li>
+      </ul>
+
+      <h3>3. How We Use Information</h3>
+      <ul>
+        <li>To operate, improve, and personalize our games.</li>
+        <li>To analyze crashes and performance issues.</li>
+        <li>To display relevant advertisements through third-party ad networks.</li>
+        <li>To respond to your support inquiries.</li>
+        <li>To comply with legal obligations.</li>
+      </ul>
+
+      <h3>4. Third-Party Services</h3>
+      <p>Our games may integrate third-party services including Google Play Services, Google AdMob, Firebase Analytics, and Unity Ads. These services have their own privacy policies and data practices that we encourage you to review. We do not sell your personal data to third parties.</p>
+
+      <h3>5. Children's Privacy</h3>
+      <p>Some of our games may be suitable for children under 13. We do not knowingly collect personal information from children under 13. If you believe your child has provided us with personal data, please contact us at <a href="mailto:support@mindnestgames.site">support@mindnestgames.site</a> and we will promptly delete it.</p>
+
+      <h3>6. Data Retention</h3>
+      <p>We retain data only for as long as necessary to provide our services and comply with legal requirements. You may request deletion of your data at any time by contacting us.</p>
+
+      <h3>7. Your Rights</h3>
+      <p>Depending on your jurisdiction, you may have the right to access, correct, delete, or restrict processing of your personal information. To exercise any of these rights, please email us at <a href="mailto:support@mindnestgames.site">support@mindnestgames.site</a>.</p>
+
+      <h3>8. Security</h3>
+      <p>We take reasonable measures to protect your information from unauthorized access, loss, or misuse. However, no internet transmission is fully secure, and we cannot guarantee absolute security.</p>
+
+      <h3>9. Changes to This Policy</h3>
+      <p>We may update this Privacy Policy periodically. When we do, we will revise the "Last Updated" date above. We encourage you to review this page regularly. Continued use of our games constitutes acceptance of the updated policy.</p>
+
+      <h3>10. Contact Us</h3>
+      <p>If you have any questions or concerns about this Privacy Policy, please reach out to us:</p>
+      <p>📧 <a href="mailto:support@mindnestgames.site">support@mindnestgames.site</a><br>
+      📍 House No 11, Khan Street, Muhalla Ijaz Park, Model Town Link Road, Lahore, Pakistan</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════ CONTACT ═══════════════ -->
+<section class="contact-section section-pad" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="section-tag"><span class="bar"></span> Get in Touch</div>
+        <h2 class="section-title">Let's Talk<br>Games 🎮</h2>
+        <p>Have a question, bug report, or partnership inquiry? We'd love to hear from you. Our team tries to respond within 24 hours.</p>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">📧</div>
+          <div class="contact-detail-text">
+            <strong>Email Us</strong>
+            <a href="mailto:support@mindnestgames.site" style="color:var(--gold);">support@mindnestgames.site</a>
+          </div>
+        </div>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">📍</div>
+          <div class="contact-detail-text">
+            <strong>Our Studio</strong>
+            House No 11, Khan Street, Muhalla Ijaz Park,<br>
+            Model Town Link Road, Lahore, Pakistan
+          </div>
+        </div>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">🕐</div>
+          <div class="contact-detail-text">
+            <strong>Response Time</strong>
+            Monday – Saturday, 10am – 7pm PKT<br>
+            Usually within 24 hours
+          </div>
+        </div>
+
+        <div class="contact-detail">
+          <div class="contact-detail-icon">🎮</div>
+          <div class="contact-detail-text">
+            <strong>Google Play</strong>
+            <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" style="color:var(--gold);">MindNest Games on Play Store</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <h3>Send a Message</h3>
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" placeholder="e.g. Ahmad Raza" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="e.g. ahmad@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" placeholder="e.g. Bug in Block Blitz Saga" />
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea placeholder="Tell us what's on your mind..."></textarea>
+        </div>
+        <button class="btn-submit" onclick="handleFormSubmit(this)">🚀 Send Message</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <div class="logo-icon">🎮</div>
+          <div><span>MindNest</span> <em>Games</em></div>
+        </div>
+        <p>A small indie game studio from Lahore, Pakistan — crafting fun, polished mobile games for players everywhere. Dream big, play bigger.</p>
+        <div class="social-links">
+          <a href="#" class="social-btn" title="Twitter/X">𝕏</a>
+          <a href="#" class="social-btn" title="Instagram">📸</a>
+          <a href="#" class="social-btn" title="YouTube">▶</a>
+          <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank" class="social-btn" title="Google Play">▲</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Games</h4>
+        <a href="#games">Block Blitz Saga</a>
+        <a href="#games">Turbo Drift World</a>
+        <a href="#games">Shadow Knights</a>
+        <a href="#games">Garden Bloom</a>
+        <a href="#games">StarJump Galaxy</a>
+        <a href="#games">Froggy Leap</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Studio</h4>
+        <a href="#about">About Us</a>
+        <a href="#games">Our Games</a>
+        <a href="#contact">Contact</a>
+        <a href="https://play.google.com/store/apps/developer?id=MindNestGames" target="_blank">Google Play</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#privacy">Privacy Policy</a>
+        <a href="#privacy">Terms of Use</a>
+        <a href="mailto:support@mindnestgames.site">Support</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2025 MindNest Games. All rights reserved. Made with <span class="footer-heart">♥</span> in Lahore, Pakistan.</div>
+      <div>
+        <a href="#privacy">Privacy Policy</a> &nbsp;·&nbsp;
+        <a href="mailto:support@mindnestgames.site">support@mindnestgames.site</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+  /* ── Star field generation ── */
+  const starsContainer = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2.5 + 1;
+    star.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%;
+      left:${Math.random()*100}%;
+      --dur:${(Math.random()*4+2).toFixed(1)}s;
+      --delay:${(Math.random()*5).toFixed(1)}s;
+      --op:${(Math.random()*.5+.3).toFixed(2)};
+    `;
+    starsContainer.appendChild(star);
+  }
+
+  /* ── Mobile menu ── */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  function closeMobileMenu() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }
+
+  /* ── Back to top ── */
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.classList.toggle('visible', window.scrollY > 400);
+  });
+
+  /* ── Smooth active nav highlight ── */
+  const sections = document.querySelectorAll('section[id], div[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.style.color = link.getAttribute('href') === '#'+entry.target.id ? 'var(--gold)' : '';
+        });
+      }
+    });
+  }, { threshold: 0.45 });
+  document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
+
+  /* ── Fade-in on scroll ── */
+  const fadeEls = document.querySelectorAll('.game-card, .feature-card, .contact-detail, .stat-item');
+  const fadeObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+        fadeObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  fadeEls.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(22px)';
+    el.style.transition = 'opacity .5s ease, transform .5s ease';
+    fadeObs.observe(el);
+  });
+
+  /* ── Form submit mock ── */
+  function handleFormSubmit(btn) {
+    const original = btn.textContent;
+    btn.textContent = '✅ Message Sent!';
+    btn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 3000);
+  }
+</script>
+</body>
+</html>
